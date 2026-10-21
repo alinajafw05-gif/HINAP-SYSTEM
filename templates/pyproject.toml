@@ -1,2 +1,0 @@
-[tool.vercel]
-entrypoint = "HINAP_System:app"
