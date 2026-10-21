@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#087f8c">
+    <title>HINAP | Patient Management Dashboard</title>
+
+    <style>
+        :root {
+            --teal: #087f8c;
+            --dark: #065965;
+            --background: #f4f8fb;
+            --surface: #ffffff;
+            --text: #263238;
+            --muted: #718096;
+            --border: #dce6ea;
+            --shadow: 0 4px 18px rgba(20,54,65,.06);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: var(--background);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        header {
+            padding: 20px 4%;
+            background: linear-gradient(135deg, var(--teal), var(--dark));
+            color: white;
+        }
+
+        .header-inner {
+            max-width: 1300px;
+            margin: auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 18px;
+            flex-wrap: wrap;
+        }
+
+        .brand h1 { margin: 0; font-size: 29px; letter-spacing: 2px; }
+        .brand p { margin: 4px 0 0; font-size: 13px; }
+
+        .account {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            font-size: 13px;
+        }
+
+        .role-badge {
+            padding: 5px 10px;
+            border: 1px solid #ffffff80;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .logout-form { margin: 0; }
+
+        .logout-button {
+            padding: 9px 13px;
+            border: 1px solid #ffffffb3;
+            border-radius: 7px;
+            background: transparent;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .logout-button:hover { background: #ffffff1c; }
+
+        main {
+            width: 94%;
+            max-width: 1300px;
+            margin: 28px auto 45px;
+        }
+
+        h2 { margin: 0 0 7px; color: var(--teal); font-size: 24px; }
+        h3 { margin: 0 0 14px; font-size: 17px; }
+
+        .muted { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.7; }
+
+        .page-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 18px;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+        }
+
+        .navigation { display: flex; gap: 9px; flex-wrap: wrap; }
+
+        .button {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            padding: 11px 15px;
+            border: 0;
+            border-radius: 7px;
+            background: var(--teal);
+            color: white;
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: bold;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .button:hover { background: var(--dark); }
+        .secondary { background: #455a64; }
+        .secondary:hover { background: #263238; }
+
+        .panel {
+            padding: 22px;
+            margin-bottom: 22px;
+            background: var(--surface);
+            border: 1px solid #e7eef1;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+        }
+
+        .alerts { margin-bottom: 18px; }
+
+        .alert {
+            padding: 12px 15px;
+            margin-bottom: 9px;
+            border-radius: 8px;
+            background: #e7f4eb;
+            color: #215f37;
+            font-size: 13px;
+        }
+
+        .alert-error { background: #fdeaea; color: #9f2222; }
+
+        .search-form {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 14px;
+        }
+
+        .search-form input { flex: 1; min-width: 0; }
+
+        input {
+            width: 100%;
+            min-height: 44px;
+            padding: 11px 13px;
+            border: 1px solid #cbd9de;
+            border-radius: 7px;
+            background: white;
+            color: var(--text);
+            font: inherit;
+            font-size: 14px;
+        }
+
+        input:focus, button:focus-visible {
+            outline: 3px solid #087f8c33;
+            outline-offset: 2px;
+        }
+
+        .clear-link { color: var(--teal); font-size: 13px; font-weight: bold; white-space: nowrap; }
+
+        .section-heading { margin: 30px 0 16px; }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 15px;
+        }
+
+        .stat-card {
+            padding: 19px;
+            background: white;
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--teal);
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+        }
+
+        .stat-label { color: var(--muted); font-size: 12px; font-weight: bold; }
+        .stat-number { margin-top: 8px; color: var(--teal); font-size: 29px; font-weight: bold; }
+        .stat-description { margin-top: 5px; color: var(--muted); font-size: 11px; }
+
+        .table-panel { padding: 0; overflow: hidden; }
+        .table-header { padding: 20px 20px 14px; }
+        .table-scroll { width: 100%; overflow-x: auto; }
+
+        table {
+            width: 100%;
+            min-width: 1100px;
+            border-collapse: collapse;
+        }
+
+        th {
+            padding: 13px 12px;
+            background: #edf6f8;
+            color: #35535b;
+            text-align: left;
+            font-size: 12px;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 13px 12px;
+            border-top: 1px solid #e8eef0;
+            text-align: left;
+            vertical-align: middle;
+            font-size: 12px;
+        }
+
+        tbody tr:hover { background: #f8fcfd; }
+
+        .patient-name { font-weight: bold; }
+        .patient-id { display: block; margin-top: 3px; color: var(--muted); font-size: 11px; }
+
+        .tag {
+            display: inline-block;
+            padding: 5px 9px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        .normal { background: #e4f5e9; color: #247347; }
+        .underweight, .overweight { background: #fff2db; color: #98600a; }
+        .obesity { background: #fce8e8; color: #a82b2b; }
+        .other { background: #eee8fa; color: #65479c; }
+
+        .actions {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            min-width: 190px;
+        }
+
+        .action {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            padding: 7px 9px;
+            border: 0;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 11px;
+            font-weight: bold;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .view { background: #e3f4f6; color: #066774; }
+        .history { background: #fff0da; color: #a46211; }
+        .edit { background: #e4f5e9; color: #247347; }
+        .download { background: #e9eafa; color: #4c51a2; }
+        .delete { background: #fce8e8; color: #a82b2b; }
+
+        .action:hover { filter: brightness(.96); }
+        .actions form { display: inline; margin: 0; }
+
+        .empty {
+            padding: 32px 18px;
+            margin-top: 18px;
+            background: #f8fcfd;
+            border: 1px dashed #cbd9de;
+            border-radius: 9px;
+            color: var(--muted);
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .empty a { color: var(--teal); font-weight: bold; }
+
+        footer { padding: 24px 12px; color: var(--muted); text-align: center; font-size: 12px; }
+
+        @media (max-width: 900px) {
+            .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <div class="header-inner">
+        <div class="brand">
+            <h1>HINAP</h1>
+            <p>Health Informatics &amp; Nutritional Assessment Platform</p>
+        </div>
+
+        <div class="account">
+            {% if current_user %}
+                <span>Signed in as <strong>{{ current_user.username }}</strong></span>
+                <span class="role-badge">{{ current_user.role }}</span>
+            {% endif %}
+
+            <form class="logout-form" method="POST" action="{{ url_for('logout') }}">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                <button class="logout-button" type="submit">Log out</button>
+            </form>
+        </div>
+    </div>
+</header>
+
+<main>
+    <section class="page-heading">
+        <div>
+            <h2>Patient Management Dashboard</h2>
+            <p class="muted">Manage patient information, review health assessments, monitor BMI, and download reports.</p>
+        </div>
+
+        <nav class="navigation" aria-label="Main navigation">
+            <a class="button" href="{{ url_for('add_patient') }}">+ Add Patient</a>
+            {% if current_user and current_user.role == 'admin' %}
+                <a class="button secondary" href="{{ url_for('users') }}">Manage Users</a>
+            {% endif %}
+        </nav>
+    </section>
+
+    <div class="alerts" aria-live="polite">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+                <div class="alert {% if category == 'error' or category == 'danger' %}alert-error{% endif %}" role="status">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endwith %}
+    </div>
+
+    <section class="panel">
+        <h3>Find a Patient</h3>
+        <p class="muted">Search registered patients by their name.</p>
+
+        <form class="search-form" method="GET" action="{{ url_for('search_patient') }}">
+            <input type="search" name="query" value="{{ query }}" maxlength="100" placeholder="Enter patient name..." aria-label="Search patient by name">
+            <button class="button" type="submit">Search</button>
+            {% if query %}
+                <a class="clear-link" href="{{ url_for('home') }}">Clear Search</a>
+            {% endif %}
+        </form>
+    </section>
+
+    <div class="section-heading">
+        <h2>Patient Statistics</h2>
+        <p class="muted">Overview of recorded screening classifications.</p>
+    </div>
+
+    <section class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-label">Total Patients</div>
+            <div class="stat-number">{{ total }}</div>
+            <div class="stat-description">Registered patient records</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-label">Normal BMI</div>
+            <div class="stat-number">{{ normal }}</div>
+            <div class="stat-description">Normal adult BMI classification</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-label">Underweight</div>
+            <div class="stat-number">{{ underweight }}</div>
+            <div class="stat-description">Below the adult BMI reference range</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-label">Overweight</div>
+            <div class="stat-number">{{ overweight }}</div>
+            <div class="stat-description">Above the adult BMI reference range</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-label">Obesity</div>
+            <div class="stat-number">{{ obesity }}</div>
+            <div class="stat-description">Adult BMI 30 or above</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-label">Age-Specific Assessment</div>
+            <div class="stat-number">{{ age_specific }}</div>
+            <div class="stat-description">Requires age-specific growth charts</div>
+        </div>
+    </section>
+
+    <div class="section-heading">
+        <h2>Patient Records</h2>
+        <p class="muted">View reports, review history, update details, or delete patient records.</p>
+    </div>
+
+    <section class="panel table-panel">
+        <div class="table-header">
+            {% if query %}
+                <p class="muted">Search results for <strong>{{ query }}</strong> — {{ shown }} patient(s) found.</p>
+            {% else %}
+                <p class="muted">{{ shown }} patient(s) displayed.</p>
+            {% endif %}
+        </div>
+
+        {% if patients %}
+            <div class="table-scroll">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Patient Name</th>
+                            <th>Age</th>
+                            <th>Gender</th>
+                            <th>Height (m)</th>
+                            <th>Weight (kg)</th>
+                            <th>BMI</th>
+                            <th>BMI Category</th>
+                            <th>Nutrition Screening</th>
+                            <th>Risk Flag</th>
+                            <th>Assessment Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for patient in patients %}
+                            <tr>
+                                <td>{{ patient.id }}</td>
+                                <td>
+                                    <span class="patient-name">{{ patient.name }}</span>
+                                    <span class="patient-id">ID: {{ patient.id }}</span>
+                                </td>
+                                <td>{{ patient.age if patient.age is not none else '—' }}</td>
+                                <td>{{ patient.gender or '—' }}</td>
+                                <td>{{ '%.2f'|format(patient.height) if patient.height is not none else '—' }}</td>
+                                <td>{{ '%.2f'|format(patient.weight) if patient.weight is not none else '—' }}</td>
+                                <td>{{ '%.2f'|format(patient.bmi) if patient.bmi is not none else '—' }}</td>
+                                <td>
+                                    {% set status = patient.bmi_status or 'Not assessed' %}
+                                    <span class="tag {% if status == 'Normal' %}normal{% elif status == 'Underweight' %}underweight{% elif status == 'Overweight' %}overweight{% elif status == 'Obesity' %}obesity{% else %}other{% endif %}">
+                                        {{ status }}
+                                    </span>
+                                </td>
+                                <td>{{ patient.nutrition_status or '—' }}</td>
+                                <td>{{ patient.risk_level or '—' }}</td>
+                                <td>{{ patient.assessment_date.strftime('%d %b %Y') if patient.assessment_date else '—' }}</td>
+                                <td>
+                                    <div class="actions">
+                                        <a class="action view" href="{{ url_for('report', id=patient.id) }}">View</a>
+                                        <a class="action history" href="{{ url_for('history', id=patient.id) }}">History</a>
+                                        <a class="action edit" href="{{ url_for('edit_patient', id=patient.id) }}">Edit</a>
+                                        <a class="action download" href="{{ url_for('download_report', id=patient.id) }}">PDF</a>
+
+                                        {% if current_user and current_user.role == 'admin' %}
+                                            <form method="POST" action="{{ url_for('delete_patient', id=patient.id) }}" onsubmit="return confirm('Delete this patient and all their assessment history?');">
+                                                <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                                                <input type="hidden" name="delete_token" value="{{ delete_token }}">
+                                                <button type="submit" class="action delete">Delete</button>
+                                            </form>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="empty">
+                {% if query %}
+                    No patients matched your search. <a href="{{ url_for('home') }}">Clear search</a>.
+                {% else %}
+                    No patient records have been added yet. <a href="{{ url_for('add_patient') }}">Add your first patient</a>.
+                {% endif %}
+            </div>
+        {% endif %}
+    </section>
+</main>
+
+<footer>HINAP — Patient Records, BMI Screening &amp; Progress Tracking</footer>
+
+</body>
+</html>
+                                            

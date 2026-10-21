@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#087f8c">
+    <title>Add Patient | HINAP</title>
+
+    <style>
+        :root {
+            --teal: #087f8c;
+            --dark: #065965;
+            --bg: #f4f8fb;
+            --text: #263238;
+            --muted: #718096;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        header {
+            padding: 20px 4%;
+            color: white;
+            background: linear-gradient(135deg, var(--teal), var(--dark));
+        }
+
+        .header-inner, main {
+            width: 94%;
+            max-width: 900px;
+            margin: auto;
+        }
+
+        .header-inner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        h1 { margin: 0; letter-spacing: 2px; }
+        header p { margin: 4px 0 0; font-size: 13px; }
+        main { margin-top: 28px; margin-bottom: 40px; }
+        h2 { margin-top: 0; color: var(--teal); }
+
+        .account {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            font-size: 13px;
+        }
+
+        .logout-form { margin: 0; }
+
+        .logout-button {
+            padding: 8px 12px;
+            border: 1px solid white;
+            border-radius: 6px;
+            background: transparent;
+            color: white;
+            cursor: pointer;
+        }
+
+        .panel {
+            padding: 25px;
+            margin-top: 20px;
+            border: 1px solid #e1e9ed;
+            border-radius: 12px;
+            background: white;
+            box-shadow: 0 4px 18px #1436410d;
+        }
+
+        .muted { color: var(--muted); font-size: 13px; }
+
+        .navigation, .form-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 18px;
+        }
+
+        .button {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            padding: 11px 15px;
+            border: 0;
+            border-radius: 7px;
+            background: var(--teal);
+            color: white;
+            font: inherit;
+            font-size: 13px;
+            font-weight: bold;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .secondary { background: #455a64; }
+
+        .alerts { margin-bottom: 15px; }
+
+        .alert {
+            padding: 12px;
+            margin-bottom: 8px;
+            border-radius: 7px;
+            background: #e7f4eb;
+            color: #215f37;
+        }
+
+        .alert-error { background: #fdeaea; color: #9f2222; }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0 18px;
+        }
+
+        .form-group { margin-bottom: 18px; min-width: 0; }
+        .full { grid-column: 1 / -1; }
+
+        label {
+            display: block;
+            margin-bottom: 7px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        input, select {
+            width: 100%;
+            min-height: 44px;
+            padding: 10px 12px;
+            border: 1px solid #cbd9de;
+            border-radius: 7px;
+            background: white;
+            color: var(--text);
+            font: inherit;
+        }
+
+        .hint { color: var(--muted); font-size: 12px; }
+
+        .bmi-preview {
+            padding: 23px;
+            margin-top: 8px;
+            border: 1px solid #cae8ed;
+            border-radius: 10px;
+            background: #e8f5f7;
+            text-align: center;
+        }
+
+        .bmi-value {
+            margin: 8px 0;
+            color: var(--teal);
+            font-size: 38px;
+            font-weight: bold;
+        }
+
+        .bmi-status {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            background: white;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        footer {
+            padding: 22px;
+            color: var(--muted);
+            text-align: center;
+            font-size: 12px;
+        }
+
+        @media (max-width: 600px) {
+            .form-grid { grid-template-columns: 1fr; }
+            .full { grid-column: auto; }
+            .panel { padding: 18px; }
+            .form-actions { flex-direction: column; }
+            .form-actions .button { width: 100%; }
+            .account { width: 100%; justify-content: space-between; }
+        }
+    </style>
+</head>
+
+<body>
+<header>
+    <div class="header-inner">
+        <div>
+            <h1>HINAP</h1>
+            <p>Health Informatics &amp; Nutritional Assessment Platform</p>
+        </div>
+
+        <div class="account">
+            {% if current_user %}
+                <span>Signed in as <strong>{{ current_user.username }}</strong></span>
+                <span>{{ current_user.role }}</span>
+            {% endif %}
+
+            <form class="logout-form" method="POST" action="{{ url_for('logout') }}">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                <button class="logout-button" type="submit">Log out</button>
+            </form>
+        </div>
+    </div>
+</header>
+
+<main>
+    <h2>Add New Patient</h2>
+    <p class="muted">Enter patient details and measurements to create the initial screening assessment.</p>
+
+    <nav class="navigation">
+        <a class="button secondary" href="{{ url_for('home') }}">Dashboard</a>
+        {% if current_user and current_user.role == 'admin' %}
+            <a class="button" href="{{ url_for('users') }}">Manage Users</a>
+        {% endif %}
+    </nav>
+
+    <div class="alerts" aria-live="polite">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+                <div class="alert {% if category == 'error' %}alert-error{% endif %}" role="status">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endwith %}
+    </div>
+
+    <section class="panel">
+        <h3>Patient Information</h3>
+        <p class="muted">Height must be entered in meters and weight in kilograms.</p>
+
+        <form id="patientForm" method="POST" action="{{ url_for('add_patient') }}">
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+
+            <div class="form-grid">
+                <div class="form-group full">
+                    <label for="name">Patient Full Name</label>
+                    <input id="name" name="name" type="text" maxlength="100"
+                           autocomplete="name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="age">Age (years)</label>
+                    <input id="age" name="age" type="number"
+                           min="1" max="120" step="1" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="gender">Gender</label>
+                    <select id="gender" name="gender" required>
+                        <option value="" selected disabled>Select gender</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="height">Height (meters)</label>
+                    <input id="height" name="height" type="number"
+                           min="0.3" max="3" step="any" inputmode="decimal" required>
+                    <span class="hint">Example: 175 cm = 1.75 meters.</span>
+                </div>
+
+                <div class="form-group">
+                    <label for="weight">Weight (kg)</label>
+                    <input id="weight" name="weight" type="number"
+                           min="0.1" max="1000" step="any" inputmode="decimal" required>
+                </div>
+            </div>
+
+            <div class="bmi-preview">
+                <h3>Live BMI Preview</h3>
+                <div class="bmi-value" id="bmiValue" aria-live="polite">--</div>
+                <div class="bmi-status" id="bmiStatus" aria-live="polite">
+                    Enter age, height and weight
+                </div>
+                <p class="muted">
+                    BMI is a screening measure, not a medical diagnosis.
+                    People under age 20 need age-specific interpretation.
+                </p>
+            </div>
+
+            <div class="form-actions">
+                <button class="button" type="submit">Save Patient &amp; Calculate BMI</button>
+                <a class="button secondary" href="{{ url_for('home') }}">Cancel</a>
+            </div>
+        </form>
+    </section>
+</main>
+
+<footer>HINAP — Patient Records, BMI Screening and Health Reporting</footer>
+
+<script>
+(function () {
+    const age = document.getElementById("age");
+    const height = document.getElementById("height");
+    const weight = document.getElementById("weight");
+    const value = document.getElementById("bmiValue");
+    const status = document.getElementById("bmiStatus");
+
+    function updateBMI() {
+        if (!age.value || !height.value || !weight.value ||
+            !age.checkValidity() || !height.checkValidity() ||
+            !weight.checkValidity()) {
+            value.textContent = "--";
+            status.textContent = "Enter valid age, height and weight";
+            return;
+        }
+
+        const bmi = Number(weight.value) /
+            (Number(height.value) * Number(height.value));
+
+        if (!Number.isFinite(bmi)) {
+            value.textContent = "--";
+            status.textContent = "Unable to calculate BMI";
+            return;
+        }
+
+        value.textContent = bmi.toFixed(2);
+
+        if (Number(age.value) < 20) {
+            status.textContent = "Age-specific assessment required";
+        } else if (bmi < 18.5) {
+            status.textContent = "Underweight";
+        } else if (bmi < 25) {
+            status.textContent = "Normal";
+        } else if (bmi < 30) {
+            status.textContent = "Overweight";
+        } else {
+            status.textContent = "Obesity";
+        }
+    }
+
+    [age, height, weight].forEach(function (input) {
+        input.addEventListener("input", updateBMI);
+        input.addEventListener("change", updateBMI);
+    });
+})();
+</script>
+</body>
+</html>

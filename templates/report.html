@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#087f8c">
+    <title>Patient Report #{{ patient.id }} | HINAP</title>
+    <style>
+        :root {
+            --teal: #087f8c;
+            --dark: #065965;
+            --bg: #f4f8fb;
+            --text: #263238;
+            --muted: #718096;
+        }
+        * { box-sizing: border-box; }
+        body { margin: 0; font-family: Arial, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+        header { padding: 20px 4%; background: linear-gradient(135deg, var(--teal), var(--dark)); color: white; }
+        .header-inner, main { width: 94%; max-width: 900px; margin: auto; }
+        .header-inner { display: flex; justify-content: space-between; align-items: center; }
+        main { margin-top: 28px; margin-bottom: 40px; }
+        h1, h2 { color: var(--teal); margin: 0; }
+        .panel { padding: 25px; margin-top: 20px; border-radius: 12px; background: white; box-shadow: 0 4px 18px rgba(20,54,65,.06); }
+        .button { display: inline-flex; padding: 10px 15px; border-radius: 6px; background: var(--teal); color: white; font-weight: bold; text-decoration: none; }
+        .secondary { background: #455a64; }
+        .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 15px; margin-top: 15px; }
+        .box { padding: 15px; background: #f4f8fb; border-radius: 8px; }
+        .box span { display: block; color: var(--muted); font-size: 12px; }
+        .box strong { font-size: 15px; }
+        .actions { display: flex; gap: 10px; margin-top: 20px; }
+    </style>
+</head>
+<body>
+<header>
+    <div class="header-inner">
+        <h1>HINAP</h1>
+        <span>Patient Health Report</span>
+    </div>
+</header>
+<main>
+    <h2>Assessment Report for {{ patient.name }}</h2>
+    <div class="actions">
+        <a class="button secondary" href="{{ url_for('home') }}">&larr; Dashboard</a>
+        <a class="button" href="{{ url_for('download_report', id=patient.id) }}">Download PDF</a>
+        <a class="button secondary" href="{{ url_for('history', id=patient.id) }}">Patient History</a>
+    </div>
+
+    <section class="panel">
+        <h3>Patient &amp; Clinical Screening Details</h3>
+        <div class="grid">
+            <div class="box"><span>Patient ID</span><strong>#{{ patient.id }}</strong></div>
+            <div class="box"><span>Full Name</span><strong>{{ patient.name }}</strong></div>
+            <div class="box"><span>Age</span><strong>{{ patient.age }} years</strong></div>
+            <div class="box"><span>Gender</span><strong>{{ patient.gender }}</strong></div>
+            <div class="box"><span>Height</span><strong>{{ patient.height }} m</strong></div>
+            <div class="box"><span>Weight</span><strong>{{ patient.weight }} kg</strong></div>
+            <div class="box"><span>BMI</span><strong>{{ patient.bmi }}</strong></div>
+            <div class="box"><span>BMI Category</span><strong>{{ patient.bmi_status }}</strong></div>
+            <div class="box"><span>Nutrition Screening</span><strong>{{ patient.nutrition_status }}</strong></div>
+            <div class="box"><span>Risk Level</span><strong>{{ patient.risk_level }}</strong></div>
+            <div class="box" style="grid-column: 1 / -1;"><span>Recommendation</span><strong>{{ patient.recommendation }}</strong></div>
+        </div>
+    </section>
+</main>
+</body>
+</html>

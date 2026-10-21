@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#087f8c">
+    <title>User Management | HINAP</title>
+
+    <style>
+        :root {
+            --teal: #087f8c;
+            --dark: #065965;
+            --bg: #f4f8fb;
+            --text: #263238;
+            --muted: #718096;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        header {
+            padding: 20px 4%;
+            color: white;
+            background: linear-gradient(135deg, var(--teal), var(--dark));
+        }
+
+        .header-inner, main {
+            width: 94%;
+            max-width: 1150px;
+            margin: auto;
+        }
+
+        .header-inner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        h1 { margin: 0; letter-spacing: 2px; }
+        header p { margin: 4px 0 0; font-size: 13px; }
+        main { margin-top: 28px; margin-bottom: 40px; }
+        h2, h3 { color: var(--teal); }
+
+        .account, .navigation {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .account { font-size: 13px; }
+        .logout-form { margin: 0; }
+
+        .logout-button {
+            padding: 8px 12px;
+            border: 1px solid white;
+            border-radius: 6px;
+            background: transparent;
+            color: white;
+            cursor: pointer;
+        }
+
+        .button {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px 14px;
+            border: 0;
+            border-radius: 6px;
+            background: var(--teal);
+            color: white;
+            font: inherit;
+            font-size: 13px;
+            font-weight: bold;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .secondary { background: #455a64; }
+
+        .panel {
+            padding: 22px;
+            margin-top: 20px;
+            border: 1px solid #e1e9ed;
+            border-radius: 11px;
+            background: white;
+            box-shadow: 0 4px 18px #1436410d;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: minmax(260px, 0.8fr) minmax(0, 1.4fr);
+            gap: 20px;
+            align-items: start;
+        }
+
+        .muted { color: var(--muted); font-size: 13px; }
+
+        label {
+            display: block;
+            margin-bottom: 7px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .form-group { margin-bottom: 17px; }
+
+        input, select {
+            width: 100%;
+            min-height: 43px;
+            padding: 10px 12px;
+            border: 1px solid #cbd9de;
+            border-radius: 6px;
+            background: white;
+            color: var(--text);
+            font: inherit;
+        }
+
+        .password-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        .password-row input { flex: 1; min-width: 0; }
+
+        .toggle {
+            padding: 8px 11px;
+            border: 1px solid #cbd9de;
+            border-radius: 6px;
+            background: #f8fbfc;
+            cursor: pointer;
+        }
+
+        .alerts { margin: 18px 0; }
+
+        .alert {
+            padding: 12px;
+            margin-bottom: 8px;
+            border-radius: 7px;
+            background: #e7f4eb;
+            color: #215f37;
+        }
+
+        .alert-error { background: #fdeaea; color: #9f2222; }
+
+        .table-scroll { overflow-x: auto; }
+
+        table {
+            width: 100%;
+            min-width: 400px;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid #e8eef0;
+            text-align: left;
+            font-size: 13px;
+        }
+
+        th { background: #edf6f8; }
+
+        .role {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 20px;
+            background: #e8f5f7;
+            color: #066774;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .role-admin { background: #eee8fa; color: #65479c; }
+
+        footer {
+            padding: 22px;
+            color: var(--muted);
+            text-align: center;
+            font-size: 12px;
+        }
+
+        @media (max-width: 800px) {
+            .grid { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 520px) {
+            .panel { padding: 16px; }
+            .account { width: 100%; justify-content: space-between; }
+        }
+    </style>
+</head>
+
+<body>
+<header>
+    <div class="header-inner">
+        <div>
+            <h1>HINAP</h1>
+            <p>Health Informatics &amp; Nutritional Assessment Platform</p>
+        </div>
+
+        <div class="account">
+            {% if current_user %}
+                <span>Signed in as <strong>{{ current_user.username }}</strong></span>
+                <span>{{ current_user.role }}</span>
+            {% endif %}
+
+            <form class="logout-form" method="POST" action="{{ url_for('logout') }}">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                <button class="logout-button" type="submit">Log out</button>
+            </form>
+        </div>
+    </div>
+</header>
+
+<main>
+    <h2>User Management</h2>
+    <p class="muted">Create authorized doctor and administrator accounts.</p>
+
+    <nav class="navigation">
+        <a class="button secondary" href="{{ url_for('home') }}">Dashboard</a>
+        <a class="button" href="{{ url_for('add_patient') }}">Add Patient</a>
+    </nav>
+
+    <div class="alerts" aria-live="polite">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+                <div class="alert {% if category == 'error' %}alert-error{% endif %}" role="status">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endwith %}
+    </div>
+
+    <div class="grid">
+        <section class="panel">
+            <h3>Create User Account</h3>
+            <p class="muted">Passwords must contain at least 12 characters.</p>
+
+            <form method="POST" action="{{ url_for('users') }}">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input id="username" name="username" type="text"
+                           minlength="3" maxlength="40"
+                           pattern="[A-Za-z0-9_.-]{3,40}"
+                           autocomplete="off" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <div class="password-row">
+                        <input id="password" name="password" type="password"
+                               minlength="12" maxlength="256"
+                               autocomplete="new-password" required>
+                        <button class="toggle" id="togglePassword"
+                                type="button" aria-pressed="false">Show</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="role">Account Role</label>
+                    <select id="role" name="role" required>
+                        <option value="doctor" selected>Doctor</option>
+                        <option value="admin">Administrator</option>
+                    </select>
+                </div>
+
+                <button class="button" type="submit">Create User</button>
+            </form>
+
+            <p class="muted">
+                Each staff member should have their own account.
+                Share credentials securely.
+            </p>
+        </section>
+
+        <section class="panel">
+            <h3>Registered Accounts ({{ users|length }})</h3>
+
+            {% if users %}
+                <div class="table-scroll">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Username</th>
+                                <th>Role</th>
+                                <th>Status</th>
+                                <th>Created (UTC)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in users %}
+                                <tr>
+                                    <td>{{ user.id }}</td>
+                                    <td>{{ user.username }}</td>
+                                    <td>
+                                        <span class="role {% if user.role == 'admin' %}role-admin{% endif %}">
+                                            {{ user.role }}
+                                        </span>
+                                    </td>
+                                    <td>{{ 'Active' if user.is_active else 'Inactive' }}</td>
+                                    <td>
+                                        {{ user.created_at.strftime('%d %b %Y') if user.created_at else '—' }}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="muted">No accounts were found.</p>
+            {% endif %}
+        </section>
+    </div>
+</main>
+
+<footer>HINAP — Authorized User Management</footer>
+
+<script>
+(function () {
+    const password = document.getElementById("password");
+    const toggle = document.getElementById("togglePassword");
+
+    if (!password || !toggle) return;
+
+    toggle.addEventListener("click", function () {
+        const show = password.type === "password";
+        password.type = show ? "text" : "password";
+        toggle.textContent = show ? "Hide" : "Show";
+        toggle.setAttribute("aria-pressed", String(show));
+    });
+})();
+</script>
+</body>
+</html>
